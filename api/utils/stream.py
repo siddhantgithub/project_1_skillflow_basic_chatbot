@@ -19,7 +19,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-async def stream_text(
+def stream_text(
     client: OpenAI,
     messages: Sequence[ChatCompletionMessageParam],
     company_context: str,
@@ -331,11 +331,11 @@ What would you like to know about SkillFlow-AI Client?"
         logger.info(f"Sending finish event: {finish_event}")
         yield format_sse(finish_event)
 
-        # Send final newline to signal end of stream for SSE
-        yield "\n"
-
         logger.info(f"Stream completed successfully for message_id: {message_id}")
         logger.info(f"Total chunks processed: {chunk_count}")
+
+        # Explicitly return to close the generator and terminate the function
+        return
 
     except Exception as e:
         error_type = type(e).__name__
