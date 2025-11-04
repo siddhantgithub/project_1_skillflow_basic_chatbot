@@ -1,9 +1,0 @@
-[tool.ruff]
-# Ruff is configured via ruff.toml
-
-[project]
-name = "skillflow-chatbot"
-version = "0.1.0"
-description = "SkillFlow AI Chatbot - FastAPI backend"
-requires-python = ">=3.10"
-
