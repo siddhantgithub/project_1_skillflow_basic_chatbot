@@ -12,12 +12,14 @@ from openai.types.chat.chat_completion_message_param import ChatCompletionMessag
 def stream_text(
     client: OpenAI,
     messages: Sequence[ChatCompletionMessageParam],
+    company_context: str,
     tool_definitions: Sequence[Dict[str, Any]],
     available_tools: Mapping[str, Callable[..., Any]],
     protocol: str = "data",
 ):
     """Yield Server-Sent Events for a streaming chat completion."""
     try:
+
         def format_sse(payload: dict) -> str:
             return f"data: {json.dumps(payload, separators=(',', ':'))}\n\n"
 
@@ -34,8 +36,46 @@ def stream_text(
         # Get model from environment variable, default to gpt-4o
         model = os.getenv("LLM_MODEL", "gpt-4o")
 
+        # Create system prompt with company context
+        system_prompt = f"""You are a helpful customer support assistant for \
+SkillFlow-AI Client.
+
+Your role is to answer questions ONLY about SkillFlow-AI Client using the \
+company information provided below.
+
+IMPORTANT RULES:
+1. ONLY answer questions related to SkillFlow-AI Client (products, pricing, \
+policies, support, etc.)
+2. If a question is NOT about SkillFlow-AI Client, politely refuse and \
+suggest company-related topics
+3. Use the company context below to provide accurate, helpful answers
+4. Be friendly, professional, and concise
+5. If you don't know something about the company, say so - don't make up \
+information
+
+COMPANY CONTEXT:
+{company_context}
+
+---
+
+When refusing non-company questions, use this format:
+"I'm here to help with questions about SkillFlow-AI Client. I can assist you with:
+• Our products and pricing plans
+• Account and billing questions
+• Course information and learning paths
+• Technical support
+
+What would you like to know about SkillFlow-AI Client?"
+"""
+
+        # Inject system prompt at the beginning of messages
+        messages_with_context = [
+            {"role": "system", "content": system_prompt},
+            *messages,
+        ]
+
         stream = client.chat.completions.create(
-            messages=messages,
+            messages=messages_with_context,
             model=model,
             stream=True,
             tools=tool_definitions,
@@ -55,7 +95,11 @@ def stream_text(
                         yield format_sse({"type": "text-start", "id": text_stream_id})
                         text_started = True
                     yield format_sse(
-                        {"type": "text-delta", "id": text_stream_id, "delta": delta.content}
+                        {
+                            "type": "text-delta",
+                            "id": text_stream_id,
+                            "delta": delta.content,
+                        }
                     )
 
                 if delta.tool_calls:
@@ -158,7 +202,9 @@ def stream_text(
 
                 raw_arguments = state["arguments"]
                 try:
-                    parsed_arguments = json.loads(raw_arguments) if raw_arguments else {}
+                    parsed_arguments = (
+                        json.loads(raw_arguments) if raw_arguments else {}
+                    )
                 except Exception as error:
                     yield format_sse(
                         {

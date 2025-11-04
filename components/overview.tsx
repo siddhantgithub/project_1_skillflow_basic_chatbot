@@ -22,7 +22,7 @@ export const Overview = () => {
           </h1>
 
           <p className="text-lg text-muted-foreground">
-            I'm your AI assistant, here to help you with questions about our products,
+            I&apos;m your AI assistant, here to help you with questions about our products,
             services, pricing, and policies.
           </p>
         </div>

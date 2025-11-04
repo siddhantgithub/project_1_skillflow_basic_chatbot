@@ -9,9 +9,10 @@ from .attachment import ClientAttachment
 
 
 class ToolInvocationState(str, Enum):
-    CALL = 'call'
-    PARTIAL_CALL = 'partial-call'
-    RESULT = 'result'
+    CALL = "call"
+    PARTIAL_CALL = "partial-call"
+    RESULT = "result"
+
 
 class ToolInvocation(BaseModel):
     state: ToolInvocationState
@@ -45,7 +46,9 @@ class ClientMessage(BaseModel):
     toolInvocations: Optional[List[ToolInvocation]] = None
 
 
-def convert_to_openai_messages(messages: List[ClientMessage]) -> List[ChatCompletionMessageParam]:
+def convert_to_openai_messages(
+    messages: List[ClientMessage],
+) -> List[ChatCompletionMessageParam]:
     openai_messages = []
 
     for message in messages:
@@ -55,100 +58,99 @@ def convert_to_openai_messages(messages: List[ClientMessage]) -> List[ChatComple
 
         if message.parts:
             for part in message.parts:
-                if part.type == 'text':
+                if part.type == "text":
                     # Ensure empty strings default to ''
-                    message_parts.append({
-                        'type': 'text',
-                        'text': part.text or ''
-                    })
+                    message_parts.append({"type": "text", "text": part.text or ""})
 
-                elif part.type == 'file':
-                    if part.contentType and part.contentType.startswith('image') and part.url:
-                        message_parts.append({
-                            'type': 'image_url',
-                            'image_url': {
-                                'url': part.url
-                            }
-                        })
+                elif part.type == "file":
+                    is_image = (
+                        part.contentType
+                        and part.contentType.startswith("image")
+                        and part.url
+                    )
+                    if is_image:
+                        message_parts.append(
+                            {"type": "image_url", "image_url": {"url": part.url}}
+                        )
                     elif part.url:
-                        # Fall back to including the URL as text if we cannot map the file directly.
-                        message_parts.append({
-                            'type': 'text',
-                            'text': part.url
-                        })
+                        # Fall back to including the URL as text if we cannot
+                        # map the file directly.
+                        message_parts.append({"type": "text", "text": part.url})
 
-                elif part.type.startswith('tool-'):
+                elif part.type.startswith("tool-"):
                     tool_call_id = part.toolCallId
-                    tool_name = part.toolName or part.type.replace('tool-', '', 1)
+                    tool_name = part.toolName or part.type.replace("tool-", "", 1)
 
                     if tool_call_id and tool_name:
                         should_emit_tool_call = False
 
-                        if part.state and any(keyword in part.state for keyword in ('call', 'input')):
+                        keywords = ("call", "input")
+                        if part.state and any(
+                            keyword in part.state for keyword in keywords
+                        ):
                             should_emit_tool_call = True
 
                         if part.input is not None or part.args is not None:
                             should_emit_tool_call = True
 
                         if should_emit_tool_call:
-                            arguments = part.input if part.input is not None else part.args
+                            arguments = (
+                                part.input if part.input is not None else part.args
+                            )
                             if isinstance(arguments, str):
                                 serialized_arguments = arguments
                             else:
                                 serialized_arguments = json.dumps(arguments or {})
 
-                            tool_calls.append({
-                                "id": tool_call_id,
-                                "type": "function",
-                                "function": {
-                                    "name": tool_name,
-                                    "arguments": serialized_arguments
+                            tool_calls.append(
+                                {
+                                    "id": tool_call_id,
+                                    "type": "function",
+                                    "function": {
+                                        "name": tool_name,
+                                        "arguments": serialized_arguments,
+                                    },
                                 }
-                            })
+                            )
 
-                        if part.state == 'output-available' and part.output is not None:
-                            tool_result_messages.append({
-                                "role": "tool",
-                                "tool_call_id": tool_call_id,
-                                "content": json.dumps(part.output),
-                            })
+                        if part.state == "output-available" and part.output is not None:
+                            tool_result_messages.append(
+                                {
+                                    "role": "tool",
+                                    "tool_call_id": tool_call_id,
+                                    "content": json.dumps(part.output),
+                                }
+                            )
 
         elif message.content is not None:
-            message_parts.append({
-                'type': 'text',
-                'text': message.content
-            })
+            message_parts.append({"type": "text", "text": message.content})
 
         if not message.parts and message.experimental_attachments:
             for attachment in message.experimental_attachments:
-                if attachment.contentType.startswith('image'):
-                    message_parts.append({
-                        'type': 'image_url',
-                        'image_url': {
-                            'url': attachment.url
-                        }
-                    })
+                if attachment.contentType.startswith("image"):
+                    message_parts.append(
+                        {"type": "image_url", "image_url": {"url": attachment.url}}
+                    )
 
-                elif attachment.contentType.startswith('text'):
-                    message_parts.append({
-                        'type': 'text',
-                        'text': attachment.url
-                    })
+                elif attachment.contentType.startswith("text"):
+                    message_parts.append({"type": "text", "text": attachment.url})
 
-        if(message.toolInvocations):
+        if message.toolInvocations:
             for toolInvocation in message.toolInvocations:
-                tool_calls.append({
-                    "id": toolInvocation.toolCallId,
-                    "type": "function",
-                    "function": {
-                        "name": toolInvocation.toolName,
-                        "arguments": json.dumps(toolInvocation.args)
+                tool_calls.append(
+                    {
+                        "id": toolInvocation.toolCallId,
+                        "type": "function",
+                        "function": {
+                            "name": toolInvocation.toolName,
+                            "arguments": json.dumps(toolInvocation.args),
+                        },
                     }
-                })
+                )
 
         if message_parts:
-            if len(message_parts) == 1 and message_parts[0]['type'] == 'text':
-                content_payload = message_parts[0]['text']
+            if len(message_parts) == 1 and message_parts[0]["type"] == "text":
+                content_payload = message_parts[0]["text"]
             else:
                 content_payload = message_parts
         else:
@@ -166,12 +168,15 @@ def convert_to_openai_messages(messages: List[ClientMessage]) -> List[ChatComple
             if content_payload:
                 openai_message["content"] = content_payload
         else:
-            # For non-tool-call messages, always include content (default to empty string)
-            openai_message["content"] = content_payload if content_payload is not None else ""
+            # For non-tool-call messages, always include content
+            # (default to empty string)
+            openai_message["content"] = (
+                content_payload if content_payload is not None else ""
+            )
 
         openai_messages.append(openai_message)
 
-        if(message.toolInvocations):
+        if message.toolInvocations:
             for toolInvocation in message.toolInvocations:
                 tool_message = {
                     "role": "tool",
