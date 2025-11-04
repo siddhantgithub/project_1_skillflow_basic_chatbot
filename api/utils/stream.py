@@ -372,7 +372,7 @@ def patch_response_with_headers(
 
     response.headers["x-vercel-ai-ui-message-stream"] = "v1"
     response.headers["Cache-Control"] = "no-cache"
-    response.headers["Connection"] = "keep-alive"
+    response.headers["Connection"] = "close"
     response.headers["X-Accel-Buffering"] = "no"
 
     if protocol:
