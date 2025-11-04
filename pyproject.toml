@@ -2,7 +2,7 @@
 name = "skillflow-chatbot"
 version = "0.1.0"
 description = "SkillFlow AI Chatbot - FastAPI backend"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 dependencies = [
     "annotated-types==0.7.0",
     "anyio==4.11.0",
