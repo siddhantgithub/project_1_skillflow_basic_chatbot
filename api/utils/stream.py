@@ -331,8 +331,8 @@ What would you like to know about SkillFlow-AI Client?"
         logger.info(f"Sending finish event: {finish_event}")
         yield format_sse(finish_event)
 
-        # Send empty event to signal end of stream
-        yield "\n"
+        # Send SSE comment to flush the buffer and signal stream end
+        yield ": stream-end\n\n"
 
         logger.info(f"Stream completed successfully for message_id: {message_id}")
         logger.info(f"Total chunks processed: {chunk_count}")
