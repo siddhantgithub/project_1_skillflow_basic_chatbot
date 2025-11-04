@@ -334,7 +334,6 @@ What would you like to know about SkillFlow-AI Client?"
 
         logger.info(f"Stream completed successfully for message_id: {message_id}")
         logger.info(f"Total chunks processed: {chunk_count}")
-        yield "data: [DONE]\n\n"
 
     except Exception as e:
         error_type = type(e).__name__
@@ -354,7 +353,6 @@ What would you like to know about SkillFlow-AI Client?"
                 "error": error_msg,
                 "errorType": error_type
             })
-            yield "data: [DONE]\n\n"
         except Exception as yield_error:
             logger.error(f"Failed to yield error message: {str(yield_error)}")
 
