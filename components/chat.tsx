@@ -16,7 +16,11 @@ export function Chat() {
     onError: (error: Error) => {
       if (error.message.includes("Too many requests")) {
         toast.error(
-          "You are sending too many messages. Please try again later."
+          "You're sending messages too quickly. Please wait a moment before trying again."
+        );
+      } else {
+        toast.error(
+          "We're experiencing technical difficulties. Please try again or contact support@skillflow-ai.com if the issue persists."
         );
       }
     },

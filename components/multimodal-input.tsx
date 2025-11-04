@@ -27,14 +27,24 @@ import { Textarea } from "./ui/textarea";
 
 const suggestedActions = [
   {
-    title: "What is the weather",
-    label: "in San Francisco?",
-    action: "What is the weather in San Francisco?",
+    title: "What products does",
+    label: "SkillFlow-AI Client offer?",
+    action: "What products does SkillFlow-AI Client offer?",
   },
   {
-    title: "How is python useful",
-    label: "for AI engineers?",
-    action: "How is python useful for AI engineers?",
+    title: "How do I get started",
+    label: "with your services?",
+    action: "How do I get started with SkillFlow-AI Client services?",
+  },
+  {
+    title: "What are your",
+    label: "pricing plans?",
+    action: "What are your pricing plans?",
+  },
+  {
+    title: "How can I contact",
+    label: "customer support?",
+    action: "How can I contact customer support?",
   },
 ];
 
@@ -159,7 +169,7 @@ export function MultimodalInput({
 
       <Textarea
         ref={textareaRef}
-        placeholder="Send a message..."
+        placeholder="Ask me anything about SkillFlow-AI Client..."
         value={input || ""}
         onChange={handleInput}
         className={cn(
@@ -173,7 +183,7 @@ export function MultimodalInput({
             event.preventDefault();
 
             if (isLoading) {
-              toast.error("Please wait for the model to finish its response!");
+              toast.error("Please wait for SkillFlow-AI to finish responding!");
             } else {
               submitForm();
             }

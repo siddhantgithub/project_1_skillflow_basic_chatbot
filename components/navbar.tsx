@@ -1,24 +1,22 @@
 "use client";
 
-import { Button } from "./ui/button";
-import { GitIcon, VercelIcon } from "./icons";
-import Link from "next/link";
+import { SkillFlowWordmark } from "./skillflow-logo";
 
 export const Navbar = () => {
   return (
-    <div className="p-2 flex flex-row gap-2 justify-between">
-      <Link href="https://github.com/vercel-labs/ai-sdk-preview-python-streaming">
-        <Button variant="outline">
-          <GitIcon /> View Source Code
-        </Button>
-      </Link>
+    <div className="p-4 flex flex-row gap-2 justify-between items-center border-b border-border">
+      <div className="flex items-center">
+        <SkillFlowWordmark height={28} />
+      </div>
 
-      <Link href="https://vercel.com/new/clone?repository-url=https://github.com/vercel-labs/ai-sdk-preview-python-streaming">
-        <Button>
-          <VercelIcon />
-          Deploy with Vercel
-        </Button>
-      </Link>
+      <div className="flex items-center gap-2">
+        <a
+          href="mailto:support@skillflow-ai.com"
+          className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          Contact Support
+        </a>
+      </div>
     </div>
   );
 };

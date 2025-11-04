@@ -1,4 +1,5 @@
 import json
+import os
 import traceback
 import uuid
 from typing import Any, Callable, Dict, Mapping, Sequence
@@ -30,9 +31,12 @@ def stream_text(
 
         yield format_sse({"type": "start", "messageId": message_id})
 
+        # Get model from environment variable, default to gpt-4o
+        model = os.getenv("LLM_MODEL", "gpt-4o")
+
         stream = client.chat.completions.create(
             messages=messages,
-            model="gpt-4o",
+            model=model,
             stream=True,
             tools=tool_definitions,
         )

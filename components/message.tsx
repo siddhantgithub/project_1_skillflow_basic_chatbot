@@ -3,11 +3,10 @@
 import type { UIMessage } from "@ai-sdk/react";
 import { motion } from "framer-motion";
 
-import { SparklesIcon } from "./icons";
 import { Markdown } from "./markdown";
 import { PreviewAttachment } from "./preview-attachment";
 import { cn } from "@/lib/utils";
-import { Weather } from "./weather";
+import { SkillFlowIcon } from "./skillflow-logo";
 
 export const PreviewMessage = ({
   message,
@@ -29,8 +28,8 @@ export const PreviewMessage = ({
         )}
       >
         {message.role === "assistant" && (
-          <div className="size-8 flex items-center rounded-full justify-center ring-1 shrink-0 ring-border">
-            <SparklesIcon size={14} />
+          <div className="size-8 flex items-center rounded-full justify-center shrink-0">
+            <SkillFlowIcon size={32} />
           </div>
         )}
 
@@ -52,11 +51,9 @@ export const PreviewMessage = ({
                 if (state === "output-available" && output) {
                   return (
                     <div key={toolCallId}>
-                      {toolName === "get_current_weather" ? (
-                        <Weather weatherAtLocation={output} />
-                      ) : (
-                        <pre>{JSON.stringify(output, null, 2)}</pre>
-                      )}
+                      <pre className="text-sm bg-muted p-3 rounded-lg overflow-auto">
+                        {JSON.stringify(output, null, 2)}
+                      </pre>
                     </div>
                   );
                 }
@@ -66,13 +63,8 @@ export const PreviewMessage = ({
                   state === "input-available"
                 ) {
                   return (
-                    <div
-                      key={toolCallId}
-                      className={cn({
-                        skeleton: ["get_current_weather"].includes(toolName),
-                      })}
-                    >
-                      {toolName === "get_current_weather" ? <Weather /> : null}
+                    <div key={toolCallId} className="text-sm text-muted-foreground">
+                      Processing...
                     </div>
                   );
                 }
@@ -111,13 +103,13 @@ export const ThinkingMessage = () => {
           }
         )}
       >
-        <div className="size-8 flex items-center rounded-full justify-center ring-1 shrink-0 ring-border">
-          <SparklesIcon size={14} />
+        <div className="size-8 flex items-center rounded-full justify-center shrink-0">
+          <SkillFlowIcon size={32} />
         </div>
 
         <div className="flex flex-col gap-2 w-full">
           <div className="flex flex-col gap-4 text-muted-foreground">
-            Thinking...
+            SkillFlow-AI is thinking...
           </div>
         </div>
       </div>

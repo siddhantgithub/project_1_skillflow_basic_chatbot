@@ -152,16 +152,22 @@ def convert_to_openai_messages(messages: List[ClientMessage]) -> List[ChatComple
             else:
                 content_payload = message_parts
         else:
-            # Ensure that we always provide some content for OpenAI
-            content_payload = ""
+            content_payload = None
 
         openai_message: ChatCompletionMessageParam = {
             "role": message.role,
-            "content": content_payload,
         }
 
+        # For assistant messages with tool_calls, content can be null
+        # For other messages, content is required
         if tool_calls:
             openai_message["tool_calls"] = tool_calls
+            # Only add content if it's not empty
+            if content_payload:
+                openai_message["content"] = content_payload
+        else:
+            # For non-tool-call messages, always include content (default to empty string)
+            openai_message["content"] = content_payload if content_payload is not None else ""
 
         openai_messages.append(openai_message)
 

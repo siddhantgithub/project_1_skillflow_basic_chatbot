@@ -3,23 +3,28 @@ import { GeistSans } from "geist/font/sans";
 import { Toaster } from "sonner";
 import { cn } from "@/lib/utils";
 import { Navbar } from "@/components/navbar";
+import { Footer } from "@/components/footer";
 
 export const metadata = {
-  title: "AI SDK Python Streaming Preview",
+  title: "SkillFlow-AI Client - Support Assistant",
   description:
-    "Use the Data Stream Protocol to stream chat completions from a Python endpoint (FastAPI) and display them using the useChat hook in your Next.js application.",
+    "Get instant answers about SkillFlow-AI Client products, services, pricing, and policies. Our AI-powered support assistant is here to help 24/7.",
   openGraph: {
+    title: "SkillFlow-AI Client - Support Assistant",
+    description: "Get instant answers about SkillFlow-AI Client products, services, pricing, and policies.",
     images: [
       {
-        url: "/og?title=AI SDK Python Streaming Preview",
+        url: "/og?title=SkillFlow-AI Client&description=AI-Powered Support Assistant",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
+    title: "SkillFlow-AI Client - Support Assistant",
+    description: "Get instant answers about SkillFlow-AI Client products, services, pricing, and policies.",
     images: [
       {
-        url: "/og?title=AI SDK Python Streaming Preview",
+        url: "/og?title=SkillFlow-AI Client&description=AI-Powered Support Assistant",
       },
     ],
   },
@@ -32,11 +37,16 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <head></head>
-      <body className={cn(GeistSans.className, "antialiased dark")}>
+      <head>
+        <link rel="icon" href="/skillflow-icon.svg" type="image/svg+xml" />
+      </head>
+      <body className={cn(GeistSans.className, "antialiased dark flex flex-col min-h-screen")}>
         <Toaster position="top-center" richColors />
         <Navbar />
-        {children}
+        <main className="flex-1">
+          {children}
+        </main>
+        <Footer />
       </body>
     </html>
   );
