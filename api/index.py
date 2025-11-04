@@ -40,6 +40,20 @@ class Request(BaseModel):
     messages: List[ClientMessage]
 
 
+@app.get("/api/health")
+async def health_check():
+    """Health check endpoint to verify deployment."""
+    import os
+    context_path = Path(__file__).parent / "context" / "company.md"
+    return {
+        "status": "ok",
+        "context_file_exists": context_path.exists(),
+        "context_path": str(context_path),
+        "has_openai_key": bool(os.getenv("OPENAI_API_KEY")),
+        "has_llm_model": bool(os.getenv("LLM_MODEL")),
+    }
+
+
 @app.post("/api/chat")
 async def handle_chat_data(request: Request, protocol: str = Query("data")):
     messages = request.messages
