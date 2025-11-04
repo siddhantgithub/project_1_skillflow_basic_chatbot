@@ -51,7 +51,7 @@ export function Chat() {
       const lastMessage = messages[messages.length - 1];
       console.log("[Chat] Last message:", {
         role: lastMessage.role,
-        contentLength: lastMessage.content?.length || 0,
+        id: lastMessage.id,
         parts: lastMessage.parts?.length || 0,
       });
     }
