@@ -54,16 +54,6 @@ async def health_check():
     }
 
 
-def stream_wrapper(generator):
-    """Wrapper to ensure generator completes and connection closes."""
-    try:
-        for chunk in generator:
-            yield chunk
-    finally:
-        # Ensure generator is closed
-        generator.close() if hasattr(generator, 'close') else None
-
-
 @app.post("/api/chat")
 async def handle_chat_data(request: Request, protocol: str = Query("data")):
     messages = request.messages
@@ -76,18 +66,15 @@ async def handle_chat_data(request: Request, protocol: str = Query("data")):
         api_key=oidc.get_vercel_oidc_token(),
         base_url="https://ai-gateway.vercel.sh/v1",
     )
-
-    generator = stream_text(
-        client,
-        openai_messages,
-        company_context,
-        TOOL_DEFINITIONS,
-        AVAILABLE_TOOLS,
-        protocol,
-    )
-
     response = StreamingResponse(
-        stream_wrapper(generator),
+        stream_text(
+            client,
+            openai_messages,
+            company_context,
+            TOOL_DEFINITIONS,
+            AVAILABLE_TOOLS,
+            protocol,
+        ),
         media_type="text/event-stream",
     )
     return patch_response_with_headers(response, protocol)
