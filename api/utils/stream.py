@@ -331,6 +331,9 @@ What would you like to know about SkillFlow-AI Client?"
         logger.info(f"Sending finish event: {finish_event}")
         yield format_sse(finish_event)
 
+        # Send message-finish event for AI SDK compatibility
+        yield format_sse({"type": "message-finish", "messageId": message_id})
+
         logger.info(f"Stream completed successfully for message_id: {message_id}")
         logger.info(f"Total chunks processed: {chunk_count}")
 
