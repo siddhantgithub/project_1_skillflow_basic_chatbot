@@ -14,6 +14,7 @@ export function Chat() {
   const { messages, setMessages, sendMessage, status, stop } = useChat({
     id: chatId,
     onError: (error: Error) => {
+      console.error("[Chat] Error occurred:", error);
       if (error.message.includes("Too many requests")) {
         toast.error(
           "You're sending messages too quickly. Please wait a moment before trying again."
@@ -24,6 +25,10 @@ export function Chat() {
         );
       }
     },
+    onFinish: (message) => {
+      console.log("[Chat] onFinish called with message:", message);
+      console.log("[Chat] Status after onFinish:", status);
+    },
   });
 
   const [messagesContainerRef, messagesEndRef] =
@@ -33,9 +38,29 @@ export function Chat() {
 
   const isLoading = status === "submitted" || status === "streaming";
 
+  // Log status changes
+  React.useEffect(() => {
+    console.log("[Chat] Status changed to:", status);
+    console.log("[Chat] isLoading:", isLoading);
+  }, [status, isLoading]);
+
+  // Log message changes
+  React.useEffect(() => {
+    console.log("[Chat] Messages updated, count:", messages.length);
+    if (messages.length > 0) {
+      const lastMessage = messages[messages.length - 1];
+      console.log("[Chat] Last message:", {
+        role: lastMessage.role,
+        contentLength: lastMessage.content?.length || 0,
+        parts: lastMessage.parts?.length || 0,
+      });
+    }
+  }, [messages]);
+
   const handleSubmit = (event?: { preventDefault?: () => void }) => {
     event?.preventDefault?.();
     if (input.trim()) {
+      console.log("[Chat] Sending message:", input);
       sendMessage({ text: input });
       setInput("");
     }
