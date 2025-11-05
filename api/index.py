@@ -1,4 +1,3 @@
-from pathlib import Path
 from typing import List
 
 from dotenv import load_dotenv
@@ -19,17 +18,6 @@ load_dotenv(".env.local")
 app = FastAPI()
 
 
-def load_company_context() -> str:
-    """Load company context from the markdown file."""
-    context_path = Path(__file__).parent / "context" / "company.md"
-
-    if context_path.exists():
-        with open(context_path, encoding="utf-8") as f:
-            return f.read()
-    else:
-        return "No company context available."
-
-
 @app.middleware("http")
 async def _vercel_set_headers(request: FastAPIRequest, call_next):
     set_headers(dict(request.headers))
@@ -43,38 +31,17 @@ class Request(BaseModel):
 @app.get("/api/health")
 async def health_check():
     """Health check endpoint to verify deployment."""
-    import os
-    context_path = Path(__file__).parent / "context" / "company.md"
-    return {
-        "status": "ok",
-        "context_file_exists": context_path.exists(),
-        "context_path": str(context_path),
-        "has_openai_key": bool(os.getenv("OPENAI_API_KEY")),
-        "has_llm_model": bool(os.getenv("LLM_MODEL")),
-    }
+    return {"status": "ok"}
 
 
 @app.post("/api/chat")
-async def handle_chat_data(request: Request, protocol: str = Query("data")):
+async def handle_chat_data(request: Request, protocol: str = Query('data')):
     messages = request.messages
     openai_messages = convert_to_openai_messages(messages)
 
-    # Load company context
-    company_context = load_company_context()
-
-    client = OpenAI(
-        api_key=oidc.get_vercel_oidc_token(),
-        base_url="https://ai-gateway.vercel.sh/v1",
-    )
+    client = OpenAI(api_key=oidc.get_vercel_oidc_token(), base_url="https://ai-gateway.vercel.sh/v1")
     response = StreamingResponse(
-        stream_text(
-            client,
-            openai_messages,
-            company_context,
-            TOOL_DEFINITIONS,
-            AVAILABLE_TOOLS,
-            protocol,
-        ),
+        stream_text(client, openai_messages, TOOL_DEFINITIONS, AVAILABLE_TOOLS, protocol),
         media_type="text/event-stream",
     )
     return patch_response_with_headers(response, protocol)
